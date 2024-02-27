@@ -12,10 +12,10 @@ import com.hh.mirishop.orderpayment.order.enttiy.Order;
 import com.hh.mirishop.orderpayment.order.enttiy.OrderItem;
 import com.hh.mirishop.orderpayment.order.repository.OrderRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -112,9 +112,10 @@ public class OrderServiceImpl implements OrderService {
     /**
      * 주문 조회
      */
+    @Override
     @Transactional(readOnly = true)
-    public List<Order> findAllOrdersByMemberNumber(Long memberNumber) {
-        return orderRepository.findAllWithMember(memberNumber);
+    public Page<Order> findAllOrdersByMemberNumber(Long memberNumber, Pageable pageable) {
+        return orderRepository.findAllByMemberNumber(memberNumber, pageable);
     }
 
     private void validateOrder(Order order) {

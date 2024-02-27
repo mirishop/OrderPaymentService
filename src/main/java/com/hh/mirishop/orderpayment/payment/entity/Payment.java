@@ -1,5 +1,6 @@
 package com.hh.mirishop.orderpayment.payment.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.hh.mirishop.orderpayment.order.enttiy.Order;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -36,6 +37,7 @@ public class Payment {
     private Long memberNumber;
 
     @OneToOne(fetch = FetchType.LAZY)
+    @JsonIgnore
     @JoinColumn(name = "order_id", referencedColumnName = "order_id")
     private Order order;
 

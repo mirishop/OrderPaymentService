@@ -4,8 +4,11 @@ package com.hh.mirishop.orderpayment.order.controller;
 import com.hh.mirishop.orderpayment.common.dto.BaseResponse;
 import com.hh.mirishop.orderpayment.order.dto.OrderAddressDto;
 import com.hh.mirishop.orderpayment.order.dto.OrderCreate;
+import com.hh.mirishop.orderpayment.order.enttiy.Order;
 import com.hh.mirishop.orderpayment.order.service.OrderService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -32,7 +35,7 @@ public class OrderController {
 
     @GetMapping("/{orderId}")
     public ResponseEntity<BaseResponse<Void>> getOrder(@RequestBody OrderCreate orderCreate,
-                                                     @RequestHeader(name = "X-MEMBER-NUMBER") Long currentMemberNumber) {
+                                                       @RequestHeader(name = "X-MEMBER-NUMBER") Long currentMemberNumber) {
         orderService.createOrder(orderCreate, currentMemberNumber);
         return ResponseEntity.ok(BaseResponse.of("결재 준비중 주문 생성 완료", true, null));
     }
@@ -48,13 +51,21 @@ public class OrderController {
     public ResponseEntity<BaseResponse<Void>> cancelOrder(@PathVariable("orderId") Long orderId,
                                                           @RequestHeader(name = "X-MEMBER-NUMBER") Long currentMemberNumber) {
         orderService.completeOrder(orderId, currentMemberNumber);
-        return ResponseEntity.ok(BaseResponse.of("주문 취소 완료", true, null));
+        return ResponseEntity.ok(BaseResponse.of("최종 주문 완료", true, null));
     }
 
     @PostMapping("/{orderId}/cancel")
     public ResponseEntity<BaseResponse<Void>> completeOrder(@PathVariable("orderId") Long orderId,
                                                             @RequestHeader(name = "X-MEMBER-NUMBER") Long currentMemberNumber) {
         orderService.cancelOrder(orderId, currentMemberNumber);
-        return ResponseEntity.ok(BaseResponse.of("최종 주문 완료", true, null));
+        return ResponseEntity.ok(BaseResponse.of("주문 취소 완료", true, null));
+    }
+
+    @GetMapping
+    public ResponseEntity<BaseResponse<Page<Order>>> findAllOrders(
+            @RequestHeader(name = "X-MEMBER-NUMBER") Long currentMemberNumber,
+            Pageable pageable) {
+        Page<Order> orders = orderService.findAllOrdersByMemberNumber(currentMemberNumber, pageable);
+        return ResponseEntity.ok(BaseResponse.of("전체 주문 조회", true, orders));
     }
 }
