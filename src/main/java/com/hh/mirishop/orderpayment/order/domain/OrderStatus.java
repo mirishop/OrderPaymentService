@@ -1,7 +1,9 @@
 package com.hh.mirishop.orderpayment.order.domain;
 
 public enum OrderStatus {
-    ORDER,
+
+    PAYMENT_WAITING,
+    COMPLETE_ORDER,
     CANCEL,
     ;
 }
