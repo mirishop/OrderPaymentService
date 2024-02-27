@@ -4,6 +4,7 @@ package com.hh.mirishop.orderpayment.order.controller;
 import com.hh.mirishop.orderpayment.common.dto.BaseResponse;
 import com.hh.mirishop.orderpayment.order.dto.OrderAddressDto;
 import com.hh.mirishop.orderpayment.order.dto.OrderCreate;
+import com.hh.mirishop.orderpayment.order.dto.OrderDto;
 import com.hh.mirishop.orderpayment.order.enttiy.Order;
 import com.hh.mirishop.orderpayment.order.service.OrderService;
 import lombok.RequiredArgsConstructor;
@@ -34,10 +35,10 @@ public class OrderController {
     }
 
     @GetMapping("/{orderId}")
-    public ResponseEntity<BaseResponse<Void>> getOrder(@RequestBody OrderCreate orderCreate,
-                                                       @RequestHeader(name = "X-MEMBER-NUMBER") Long currentMemberNumber) {
-        orderService.createOrder(orderCreate, currentMemberNumber);
-        return ResponseEntity.ok(BaseResponse.of("결재 준비중 주문 생성 완료", true, null));
+    public ResponseEntity<BaseResponse<OrderDto>> getOrder(@PathVariable("orderId") Long orderId,
+                                                           @RequestHeader(name = "X-MEMBER-NUMBER") Long currentMemberNumber) {
+        OrderDto orderByMemberNumber = orderService.findOrderByMemberNumber(orderId);
+        return ResponseEntity.ok(BaseResponse.of("주문 단건 조회 완료", true, orderByMemberNumber));
     }
 
     @PutMapping("/{orderId}/address")

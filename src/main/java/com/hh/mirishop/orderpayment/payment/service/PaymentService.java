@@ -1,6 +1,8 @@
 package com.hh.mirishop.orderpayment.payment.service;
 
+import com.hh.mirishop.orderpayment.payment.dto.PaymentResponse;
+
 public interface PaymentService {
 
-    Long createPayment(Long orderId, Long currentMemberNumber);
+    PaymentResponse createPayment(Long orderId, Long currentMemberNumber);
 }

@@ -2,10 +2,13 @@ package com.hh.mirishop.orderpayment.payment.controller;
 
 import com.hh.mirishop.orderpayment.common.dto.BaseResponse;
 import com.hh.mirishop.orderpayment.payment.dto.PaymentCreate;
+import com.hh.mirishop.orderpayment.payment.dto.PaymentResponse;
 import com.hh.mirishop.orderpayment.payment.service.PaymentService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -17,9 +20,10 @@ public class PaymentController {
     private final PaymentService paymentService;
 
     @PostMapping
-    public ResponseEntity<BaseResponse<Void>> process(PaymentCreate paymentCreate) {
-        paymentService.createPayment(paymentCreate.getOrderId(), paymentCreate.getMemberNumber());
+    public ResponseEntity<BaseResponse<PaymentResponse>> process(@RequestBody PaymentCreate paymentCreate,
+                                                                 @RequestHeader(name = "X-MEMBER-NUMBER") Long currentMemberNumber) {
+        PaymentResponse payment = paymentService.createPayment(paymentCreate.getOrderId(), currentMemberNumber);
 
-        return ResponseEntity.ok(BaseResponse.of("결제 성공", true, null));
+        return ResponseEntity.ok(BaseResponse.of("결제 성공", true, payment));
     }
 }

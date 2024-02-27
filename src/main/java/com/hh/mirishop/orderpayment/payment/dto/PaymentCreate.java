@@ -8,5 +8,4 @@ import lombok.NoArgsConstructor;
 public class PaymentCreate {
 
     private Long orderId;
-    private Long memberNumber;
 }

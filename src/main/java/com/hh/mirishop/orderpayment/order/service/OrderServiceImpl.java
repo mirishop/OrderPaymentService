@@ -8,6 +8,7 @@ import com.hh.mirishop.orderpayment.common.exception.OrderException;
 import com.hh.mirishop.orderpayment.order.domain.OrderStatus;
 import com.hh.mirishop.orderpayment.order.dto.OrderAddressDto;
 import com.hh.mirishop.orderpayment.order.dto.OrderCreate;
+import com.hh.mirishop.orderpayment.order.dto.OrderDto;
 import com.hh.mirishop.orderpayment.order.enttiy.Order;
 import com.hh.mirishop.orderpayment.order.enttiy.OrderItem;
 import com.hh.mirishop.orderpayment.order.repository.OrderRepository;
@@ -16,6 +17,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -26,7 +29,29 @@ public class OrderServiceImpl implements OrderService {
     private final OrderRepository orderRepository;
 
     /**
-     * 주문
+     * 전체 주문 조회
+     */
+    @Override
+    @Transactional(readOnly = true)
+    public Page<Order> findAllOrdersByMemberNumber(Long memberNumber, Pageable pageable) {
+        return orderRepository.findAllByMemberNumber(memberNumber, pageable);
+    }
+
+    /**
+     * 주문 조회
+     */
+    @Override
+    @Transactional(readOnly = true)
+    public OrderDto findOrderByMemberNumber(Long orderId) {
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new OrderException(ErrorCode.ORDER_NOT_FOUND));
+
+        OrderDto orderDto = new OrderDto(order);
+        return orderDto;
+    }
+
+    /**
+     * 주문 생성
      */
     @Override
     @Transactional
@@ -107,15 +132,6 @@ public class OrderServiceImpl implements OrderService {
         });
 
         orderRepository.save(order);
-    }
-
-    /**
-     * 주문 조회
-     */
-    @Override
-    @Transactional(readOnly = true)
-    public Page<Order> findAllOrdersByMemberNumber(Long memberNumber, Pageable pageable) {
-        return orderRepository.findAllByMemberNumber(memberNumber, pageable);
     }
 
     private void validateOrder(Order order) {
