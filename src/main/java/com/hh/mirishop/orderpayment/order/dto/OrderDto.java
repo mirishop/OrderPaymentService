@@ -11,13 +11,14 @@ import java.util.List;
 public class OrderDto {
 
     private Long orderId;
-    private String name;
+    private Long memberNumber;
     private LocalDateTime orderDate;
     private OrderStatus status;
     private List<OrderItemDto> orderItems;
 
     public OrderDto(Order order) {
         this.orderId = order.getOrderId();
+        this.memberNumber = order.getMemberNumber();
         this.orderDate = order.getOrderDate();
         this.status = order.getStatus();
         this.orderItems = order.getOrderItems().stream()

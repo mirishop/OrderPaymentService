@@ -13,9 +13,9 @@ public interface ProductServiceClient {
     @GetMapping("/api/v1/internal/products/{productId}")
     ProductResponse getProductById(@PathVariable("productId") Long productId);
 
-    @PostMapping("/api/v1/internal/stock/decrease")
+    @PostMapping("/api/v1/internal/stocks/decrease")
     void decreaseStock(@RequestParam("productId") Long productId, @RequestParam("count") int count);
 
-    @PostMapping("/api/v1/internal/stock/restore")
+    @PostMapping("/api/v1/internal/stocks/restore")
     void restoreStock(@RequestParam("productId") Long productId, @RequestParam("count") int count);
 }

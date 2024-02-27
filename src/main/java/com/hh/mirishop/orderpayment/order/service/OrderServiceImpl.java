@@ -6,15 +6,19 @@ import com.hh.mirishop.orderpayment.client.dto.ProductResponse;
 import com.hh.mirishop.orderpayment.common.exception.ErrorCode;
 import com.hh.mirishop.orderpayment.common.exception.OrderException;
 import com.hh.mirishop.orderpayment.order.domain.OrderStatus;
+import com.hh.mirishop.orderpayment.order.dto.OrderAddressDto;
 import com.hh.mirishop.orderpayment.order.dto.OrderCreate;
+import com.hh.mirishop.orderpayment.order.dto.OrderDto;
 import com.hh.mirishop.orderpayment.order.enttiy.Order;
 import com.hh.mirishop.orderpayment.order.enttiy.OrderItem;
 import com.hh.mirishop.orderpayment.order.repository.OrderRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -25,7 +29,29 @@ public class OrderServiceImpl implements OrderService {
     private final OrderRepository orderRepository;
 
     /**
-     * 주문
+     * 전체 주문 조회
+     */
+    @Override
+    @Transactional(readOnly = true)
+    public Page<Order> findAllOrdersByMemberNumber(Long memberNumber, Pageable pageable) {
+        return orderRepository.findAllByMemberNumber(memberNumber, pageable);
+    }
+
+    /**
+     * 주문 조회
+     */
+    @Override
+    @Transactional(readOnly = true)
+    public OrderDto findOrderByMemberNumber(Long orderId) {
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new OrderException(ErrorCode.ORDER_NOT_FOUND));
+
+        OrderDto orderDto = new OrderDto(order);
+        return orderDto;
+    }
+
+    /**
+     * 주문 생성
      */
     @Override
     @Transactional
@@ -45,9 +71,6 @@ public class OrderServiceImpl implements OrderService {
                 .orderPrice(productResponse.getPrice())
                 .count(count)
                 .build();
-        System.out.println("아이디"+orderItem.getProductId());
-        System.out.println("카운트"+orderItem.getCount());
-
 
         // 재고 감소
         productServiceClient.decreaseStock(orderItem.getProductId(), orderItem.getCount());
@@ -58,6 +81,39 @@ public class OrderServiceImpl implements OrderService {
         // 주문 저장
         orderRepository.save(order);
         return order.getOrderId();
+    }
+
+    /**
+     * 주소 정보 추가
+     */
+    @Override
+    @Transactional
+    public void addAddressToOrder(Long orderId, OrderAddressDto address) {
+        Order savedOrder = orderRepository.findById(orderId)
+                .orElseThrow(() -> new OrderException(ErrorCode.ORDER_NOT_FOUND));
+
+        savedOrder.addAddress(address.getAddress());
+    }
+
+    /**
+     * 주문 완료 처리
+     */
+    @Override
+    @Transactional
+    public void completeOrder(Long orderId, Long currentMemberNumber) {
+        Order order = orderRepository.findByOrderIdAndMemberNumber(orderId, currentMemberNumber)
+                .orElseThrow(() -> new OrderException(ErrorCode.ORDER_NOT_FOUND));
+
+        // 주문 상태 검증
+        if (order.getStatus() != OrderStatus.PAYMENT_WAITING) {
+            throw new OrderException(ErrorCode.INVALID_ORDER_STATUS);
+        }
+
+        // 주문 상태 완료처리
+        order.complete();
+
+        // 변경된 주문 정보 저장
+        orderRepository.save(order);
     }
 
     /**
@@ -76,14 +132,6 @@ public class OrderServiceImpl implements OrderService {
         });
 
         orderRepository.save(order);
-    }
-
-    /**
-     * 주문 조회
-     */
-    @Transactional(readOnly = true)
-    public List<Order> findAllOrdersByMemberNumber(Long memberNumber) {
-        return orderRepository.findAllWithMember(memberNumber);
     }
 
     private void validateOrder(Order order) {
