@@ -19,6 +19,10 @@ public class PaymentController {
 
     private final PaymentService paymentService;
 
+    /**
+     * 결제 정보를 받아 PaymentResponse를 리턴합니다.
+     * PaymentResponse에는 orderId, paymentId, 결제 시간이 있습니다.
+     */
     @PostMapping
     public ResponseEntity<BaseResponse<PaymentResponse>> process(@RequestBody PaymentCreate paymentCreate,
                                                                  @RequestHeader(name = "X-MEMBER-NUMBER") Long currentMemberNumber) {

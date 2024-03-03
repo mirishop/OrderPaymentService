@@ -18,8 +18,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Optional;
-
 @Service
 @RequiredArgsConstructor
 public class OrderServiceImpl implements OrderService {
@@ -29,7 +27,7 @@ public class OrderServiceImpl implements OrderService {
     private final OrderRepository orderRepository;
 
     /**
-     * 전체 주문 조회
+     * 유저의 전체 주문 조회 메소드
      */
     @Override
     @Transactional(readOnly = true)
@@ -38,20 +36,22 @@ public class OrderServiceImpl implements OrderService {
     }
 
     /**
-     * 주문 조회
+     * 유저의 단건 주문 조회 메소드
      */
     @Override
     @Transactional(readOnly = true)
     public OrderDto findOrderByMemberNumber(Long orderId) {
-        Order order = orderRepository.findById(orderId)
+        Order order = orderRepository.findOrderWithOrderItemsByOrderId(orderId)
                 .orElseThrow(() -> new OrderException(ErrorCode.ORDER_NOT_FOUND));
 
-        OrderDto orderDto = new OrderDto(order);
-        return orderDto;
+        return new OrderDto(order);
     }
 
     /**
-     * 주문 생성
+     * 주문을 생성하는 메소드
+     * 1. ProductResponse로 Product를 받아서 OrderItem을 생성.
+     * 2. stock 을 감소시킴
+     * 3. Order에 OrderItem과 주문 정보를 담아 DB저장
      */
     @Override
     @Transactional
@@ -84,7 +84,7 @@ public class OrderServiceImpl implements OrderService {
     }
 
     /**
-     * 주소 정보 추가
+     * 주문 후 주소 정보 추가 메소드
      */
     @Override
     @Transactional
@@ -96,7 +96,8 @@ public class OrderServiceImpl implements OrderService {
     }
 
     /**
-     * 주문 완료 처리
+     * 최종 주문 완료 처리 메소드
+     * 주문 상태가 PAYMENT_WATING일때만 진행 가능
      */
     @Override
     @Transactional
@@ -117,7 +118,7 @@ public class OrderServiceImpl implements OrderService {
     }
 
     /**
-     * 주문 취소
+     * 주문 취소 메소드
      */
     @Transactional
     public void cancelOrder(Long orderId, Long currentMemberNumber) {

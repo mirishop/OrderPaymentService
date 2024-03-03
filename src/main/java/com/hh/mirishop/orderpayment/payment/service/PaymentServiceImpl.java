@@ -18,6 +18,9 @@ public class PaymentServiceImpl implements PaymentService{
     private final PaymentRepository paymentRepository;
     private final OrderRepository orderRepository;
 
+    /**
+     * 결제를 생성하는 메소드
+     */
     @Override
     @Transactional
     public PaymentResponse createPayment(Long orderId, Long currentMemberNumber) {
